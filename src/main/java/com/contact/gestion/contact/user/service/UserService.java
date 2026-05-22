@@ -3,6 +3,7 @@ package com.contact.gestion.contact.user.service;
 import com.contact.gestion.contact.user.model.user;
 import com.contact.gestion.contact.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Import nécessaire
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -12,11 +13,16 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder; // Injection de l'encodeur
+
     // 1. AJOUTER
     public user ajouterUser(user u) {
         if (userRepository.findByEmail(u.getEmail()).isPresent()) {
             throw new RuntimeException("Cet email est déjà utilisé !");
         }
+        // Hachage du mot de passe avant enregistrement
+        u.setPassword(passwordEncoder.encode(u.getPassword()));
         return userRepository.save(u);
     }
 
@@ -30,7 +36,6 @@ public class UserService {
         user existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User introuvable avec l'id : " + id));
 
-        // Verifier l'email unique si l'email a changé
         if (!existingUser.getEmail().equals(userDetails.getEmail()) &&
                 userRepository.findByEmail(userDetails.getEmail()).isPresent()) {
             throw new RuntimeException("Cet email est déjà utilisé par un autre utilisateur !");
@@ -39,7 +44,10 @@ public class UserService {
         existingUser.setFirstName(userDetails.getFirstName());
         existingUser.setLastName(userDetails.getLastName());
         existingUser.setEmail(userDetails.getEmail());
-        existingUser.setPassword(userDetails.getPassword());
+
+        // Hachage du mot de passe uniquement s'il est modifié
+        existingUser.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+
         existingUser.setDepartement(userDetails.getDepartement());
         existingUser.setRole(userDetails.getRole());
 
