@@ -4,7 +4,7 @@ import com.contact.gestion.contact.user.model.user;
 import com.contact.gestion.contact.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -12,22 +12,44 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // 1. Inscription
-    public user inscrire(user utilisateur) {
-        if (userRepository.findByEmail(utilisateur.getEmail()).isPresent()) {
-            throw new RuntimeException("Erreur : Cet email est déjà utilisé !");
+    // 1. AJOUTER
+    public user ajouterUser(user u) {
+        if (userRepository.findByEmail(u.getEmail()).isPresent()) {
+            throw new RuntimeException("Cet email est déjà utilisé !");
         }
-        return userRepository.save(utilisateur);
+        return userRepository.save(u);
     }
 
-    // 2. Authentification
-    public boolean authentifier(String email, String password) {
-        Optional<user> utilisateurOpt = userRepository.findByEmail(email);
+    // 2. AFFICHER TOUS
+    public List<user> getAllUsers() {
+        return userRepository.findAll();
+    }
 
-        if (utilisateurOpt.isPresent()) {
-            return utilisateurOpt.get().getPassword().equals(password);
+    // 3. MODIFIER
+    public user updateUser(Long id, user userDetails) {
+        user existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User introuvable avec l'id : " + id));
+
+        // Verifier l'email unique si l'email a changé
+        if (!existingUser.getEmail().equals(userDetails.getEmail()) &&
+                userRepository.findByEmail(userDetails.getEmail()).isPresent()) {
+            throw new RuntimeException("Cet email est déjà utilisé par un autre utilisateur !");
         }
 
-        return false;
+        existingUser.setFirstName(userDetails.getFirstName());
+        existingUser.setLastName(userDetails.getLastName());
+        existingUser.setEmail(userDetails.getEmail());
+        existingUser.setPassword(userDetails.getPassword());
+        existingUser.setDepartement(userDetails.getDepartement());
+        existingUser.setRole(userDetails.getRole());
+
+        return userRepository.save(existingUser);
+    }
+
+    // 4. SUPPRIMER
+    public void deleteUser(Long id) {
+        user existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User introuvable avec l'id : " + id));
+        userRepository.delete(existingUser);
     }
 }

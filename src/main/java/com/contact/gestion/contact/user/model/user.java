@@ -1,10 +1,12 @@
 package com.contact.gestion.contact.user.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "users")
-public class user { // Khlina l-smiya b "user" sghira kima dayrha f l-fichier
+public class user { // CONVENTION FIX : Toujours une Majuscule pour le nom de la classe 'User'
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,9 +18,13 @@ public class user { // Khlina l-smiya b "user" sghira kima dayrha f l-fichier
     @Column(nullable = false)
     private String lastName;
 
+    @NotBlank(message = "L'email ne peut pas être vide")
+    @Email(message = "Le format de l'email est invalide !")
     @Column(nullable = false, unique = true)
     private String email;
 
+    // NOTE : On garde le champ password, mais on va l'enregistrer en texte brut (brut/plain text)
+    // temporairement pour Postman, sans BCrypt ni Spring Security.
     @Column(nullable = false)
     private String password;
 
@@ -34,7 +40,7 @@ public class user { // Khlina l-smiya b "user" sghira kima dayrha f l-fichier
     public user() {
     }
 
-    // Full Constructor
+    // Constructor avec paramètres
     public user(Long id, String firstName, String lastName, String email, String password, Role role, Departement departement) {
         this.id = id;
         this.firstName = firstName;
