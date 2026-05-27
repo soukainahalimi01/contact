@@ -1,6 +1,5 @@
 package com.contact.gestion.contact.controller;
 
-import com.contact.gestion.contact.contacts.model.Contact;
 import com.contact.gestion.contact.contacts.repository.ContactRepository;
 import com.contact.gestion.contact.model.Coordonnee;
 import com.contact.gestion.contact.repository.CoordonneeRepository;
@@ -19,19 +18,32 @@ public class CoordonneeController {
     @Autowired
     private ContactRepository contactRepository;
 
-    // Ajouter une coordonnée à un contact existant (via son ID)
     @PostMapping("/{contactId}")
     public Coordonnee create(@PathVariable Long contactId, @RequestBody Coordonnee coordonnee) {
-        Contact contact = contactRepository.findById(contactId)
-                .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
-
-        coordonnee.setContact(contact);
-        return coordonneeRepository.save(coordonnee);
+        return contactRepository.findById(contactId).map(contact -> {
+            contact.addCoordonnee(coordonnee);
+            contactRepository.save(contact); // On sauvegarde le parent (Contact)
+            return coordonnee;
+        }).orElseThrow(() -> new RuntimeException("Contact non trouvé"));
     }
 
-    // Récupérer toutes les coordonnées
     @GetMapping
     public List<Coordonnee> getAll() {
         return coordonneeRepository.findAll();
+    }
+
+    @PutMapping("/{id}")
+    public Coordonnee update(@PathVariable Long id, @RequestBody Coordonnee details) {
+        return coordonneeRepository.findById(id).map(c -> {
+            c.setType(details.getType());
+            c.setValeur(details.getValeur());
+            c.setLabel(details.getLabel());
+            return coordonneeRepository.save(c);
+        }).orElseThrow(() -> new RuntimeException("Coordonnée non trouvée"));
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        coordonneeRepository.deleteById(id);
     }
 }

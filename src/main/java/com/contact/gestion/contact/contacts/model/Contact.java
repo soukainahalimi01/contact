@@ -30,6 +30,10 @@ public class Contact {
     // 1. Constructeur vide (Obligatoire pour JPA)
     public Contact() {
     }
+    public void addCoordonnee(Coordonnee coordonnee) {
+        this.coordonnees.add(coordonnee);
+        coordonnee.setContact(this);
+    }
 
     // 2. Constructeur avec arguments
     public Contact(Long id, String nom, String prenom, String tel, String cin, String ville, String pays, String adresse, String email) {

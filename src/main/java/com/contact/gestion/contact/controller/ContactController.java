@@ -14,22 +14,44 @@ public class ContactController {
     @Autowired
     private ContactRepository contactRepository;
 
-    // Créer un nouveau contact
-    @PostMapping
-    public Contact create(@RequestBody Contact contact) {
-        return contactRepository.save(contact);
-    }
-
-    // Récupérer tous les contacts
+    // 1. GET ALL
     @GetMapping
     public List<Contact> getAll() {
         return contactRepository.findAll();
     }
 
-    // Récupérer un contact spécifique par ID (avec sa liste de coordonnées)
+    // 2. GET BY ID (C'est ici que tu verras le Contact + ses Coordonnées)
     @GetMapping("/{id}")
     public Contact getById(@PathVariable Long id) {
         return contactRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
+                .orElseThrow(() -> new RuntimeException("Contact non trouvé avec l'id : " + id));
+    }
+
+    // 3. POST (Créer un nouveau contact)
+    @PostMapping
+    public Contact create(@RequestBody Contact contact) {
+        return contactRepository.save(contact);
+    }
+
+    // 4. PUT (Modifier un contact existant)
+    @PutMapping("/{id}")
+    public Contact update(@PathVariable Long id, @RequestBody Contact details) {
+        return contactRepository.findById(id).map(contact -> {
+            contact.setNom(details.getNom());
+            contact.setPrenom(details.getPrenom());
+            contact.setTel(details.getTel());
+            contact.setCin(details.getCin());
+            contact.setVille(details.getVille());
+            contact.setPays(details.getPays());
+            contact.setAdresse(details.getAdresse());
+            contact.setEmail(details.getEmail());
+            return contactRepository.save(contact);
+        }).orElseThrow(() -> new RuntimeException("Contact non trouvé"));
+    }
+
+    // 5. DELETE (Supprimer un contact)
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        contactRepository.deleteById(id);
     }
 }
