@@ -10,7 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     // Ce Bean permet d'utiliser l'encodeur partout dans l'application
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

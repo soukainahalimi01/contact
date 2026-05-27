@@ -1,11 +1,9 @@
 package com.contact.gestion.contact.contacts.model;
 
-import jakarta.persistence.Entity;
-
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.contact.gestion.contact.model.Coordonnee; // Import du modèle Coordonnee
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "contacts")
@@ -14,6 +12,7 @@ public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nom;
     private String prenom;
     private String tel;
@@ -23,13 +22,16 @@ public class Contact {
     private String adresse;
     private String email;
 
+    // Relation OneToMany : Un contact peut avoir plusieurs coordonnées
+    // mappedBy = "contact" fait référence au champ 'contact' dans la classe Coordonnee
+    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coordonnee> coordonnees = new ArrayList<>();
 
-
-    // 1. Empty Constructor (Required by JPA/Hibernate)
+    // 1. Constructeur vide (Obligatoire pour JPA)
     public Contact() {
     }
 
-    // 2. All Arguments Constructor
+    // 2. Constructeur avec arguments
     public Contact(Long id, String nom, String prenom, String tel, String cin, String ville, String pays, String adresse, String email) {
         this.id = id;
         this.nom = nom;
@@ -43,76 +45,34 @@ public class Contact {
     }
 
     // 3. Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
 
-    public String getNom() {
-        return nom;
-    }
+    public String getPrenom() { return prenom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
 
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
+    public String getTel() { return tel; }
+    public void setTel(String tel) { this.tel = tel; }
 
-    public String getPrenom() {
-        return prenom;
-    }
+    public String getCin() { return cin; }
+    public void setCin(String cin) { this.cin = cin; }
 
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
+    public String getVille() { return ville; }
+    public void setVille(String ville) { this.ville = ville; }
 
-    public String getTel() {
-        return tel;
-    }
+    public String getPays() { return pays; }
+    public void setPays(String pays) { this.pays = pays; }
 
-    public void setTel(String tel) {
-        this.tel = tel;
-    }
+    public String getAdresse() { return adresse; }
+    public void setAdresse(String adresse) { this.adresse = adresse; }
 
-    public String getCin() {
-        return cin;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setCin(String cin) {
-        this.cin = cin;
-    }
-
-    public String getVille() {
-        return ville;
-    }
-
-    public void setVille(String ville) {
-        this.ville = ville;
-    }
-
-    public String getPays() {
-        return pays;
-    }
-
-    public void setPays(String pays) {
-        this.pays = pays;
-    }
-
-    public String getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
+    // Getters et Setters pour la relation Coordonnees
+    public List<Coordonnee> getCoordonnees() { return coordonnees; }
+    public void setCoordonnees(List<Coordonnee> coordonnees) { this.coordonnees = coordonnees; }
 }
