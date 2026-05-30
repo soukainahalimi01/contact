@@ -1,7 +1,7 @@
-package com.contact.gestion.contact.service;
+package com.contact.gestion.contact.coordonnee.service;
 
-import com.contact.gestion.contact.model.Coordonnee;
-import com.contact.gestion.contact.repository.CoordonneeRepository;
+import com.contact.gestion.contact.coordonnee.model.Coordonnee;
+import com.contact.gestion.contact.coordonnee.repository.CoordonneeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

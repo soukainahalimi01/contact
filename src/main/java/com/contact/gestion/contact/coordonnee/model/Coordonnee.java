@@ -1,4 +1,4 @@
-package com.contact.gestion.contact.model;
+package com.contact.gestion.contact.coordonnee.model;
 
 import com.contact.gestion.contact.contacts.model.Contact;
 import com.fasterxml.jackson.annotation.JsonIgnore;

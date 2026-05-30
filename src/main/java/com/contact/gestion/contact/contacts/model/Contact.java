@@ -1,9 +1,8 @@
 package com.contact.gestion.contact.contacts.model;
 
-import com.contact.gestion.contact.model.Coordonnee;
+import com.contact.gestion.contact.coordonnee.model.Coordonnee;
 import com.contact.gestion.contact.user.model.User; // تأكدي أنك بدلتِها هنا
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

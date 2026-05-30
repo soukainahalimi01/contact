@@ -1,6 +1,6 @@
-package com.contact.gestion.contact.repository;
+package com.contact.gestion.contact.coordonnee.repository;
 
-import com.contact.gestion.contact.model.Coordonnee;
+import com.contact.gestion.contact.coordonnee.model.Coordonnee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
