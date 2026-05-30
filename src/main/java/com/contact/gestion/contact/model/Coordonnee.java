@@ -21,5 +21,8 @@ public class Coordonnee {
     @JsonIgnore
     private Contact contact;
 
-
+    // هاد الميثود هي اللي كانت خاصا باش يوقع الربط (Association)
+    public void setContact(Contact contact) {
+        this.contact = contact;
+    }
 }

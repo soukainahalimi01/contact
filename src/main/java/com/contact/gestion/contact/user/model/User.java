@@ -1,12 +1,16 @@
 package com.contact.gestion.contact.user.model;
 
+import com.contact.gestion.contact.contacts.model.Contact;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class user { // CONVENTION FIX : Toujours une Majuscule pour le nom de la classe 'User'
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +27,7 @@ public class user { // CONVENTION FIX : Toujours une Majuscule pour le nom de la
     @Column(nullable = false, unique = true)
     private String email;
 
-    // NOTE : On garde le champ password, mais on va l'enregistrer en texte brut (brut/plain text)
-    // temporairement pour Postman, sans BCrypt ni Spring Security.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
 
@@ -36,12 +39,13 @@ public class user { // CONVENTION FIX : Toujours une Majuscule pour le nom de la
     @Column(nullable = false)
     private Departement departement = Departement.RH;
 
-    // Empty Constructor
-    public user() {
-    }
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Contact> contacts;
 
-    // Constructor avec paramètres
-    public user(Long id, String firstName, String lastName, String email, String password, Role role, Departement departement) {
+    public User() {}
+
+    public User(Long id, String firstName, String lastName, String email, String password, Role role, Departement departement) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -51,7 +55,6 @@ public class user { // CONVENTION FIX : Toujours une Majuscule pour le nom de la
         this.departement = departement;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -72,4 +75,7 @@ public class user { // CONVENTION FIX : Toujours une Majuscule pour le nom de la
 
     public Departement getDepartement() { return departement; }
     public void setDepartement(Departement departement) { this.departement = departement; }
+
+    public List<Contact> getContacts() { return contacts; }
+    public void setContacts(List<Contact> contacts) { this.contacts = contacts; }
 }
