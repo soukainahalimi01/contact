@@ -1,9 +1,9 @@
 package com.contact.gestion.contact.user.controller;
 
-import com.contact.gestion.contact.user.model.user;
+import com.contact.gestion.contact.user.model.User;
 import com.contact.gestion.contact.user.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -14,37 +14,33 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserService userService; // Khdemna b UserService db direct!
+    private UserService userService;
 
-    // 1. POST -> Ajouter : http://localhost:8080/api/users
     @PostMapping
-    public ResponseEntity<?> ajouter(@Valid @RequestBody user user) {
+    public ResponseEntity<?> ajouter(@RequestBody User user) {
         try {
-            user nouveauUser = userService.ajouterUser(user);
+            User nouveauUser = userService.ajouterUser(user);
             return ResponseEntity.ok(nouveauUser);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // 2. GET -> Afficher tous : http://localhost:8080/api/users
     @GetMapping
-    public ResponseEntity<List<user>> getAll() {
+    public ResponseEntity<List<User>> getAll() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    // 3. PUT -> Modifier : http://localhost:8080/api/users/{id}
-    @PutMapping("/{id}")
-    public ResponseEntity<?> modifier(@PathVariable Long id, @Valid @RequestBody user userDetails) {
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> modifier(@PathVariable Long id, @RequestBody User userDetails) {
         try {
-            user userModifie = userService.updateUser(id, userDetails);
+            User userModifie = userService.updateUser(id, userDetails);
             return ResponseEntity.ok(userModifie);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // 4. DELETE -> Supprimer : http://localhost:8080/api/users/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<?> supprimer(@PathVariable Long id) {
         try {

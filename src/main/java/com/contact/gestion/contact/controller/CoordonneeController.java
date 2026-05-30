@@ -1,11 +1,10 @@
 package com.contact.gestion.contact.controller;
 
-import com.contact.gestion.contact.contacts.repository.ContactRepository;
 import com.contact.gestion.contact.model.Coordonnee;
 import com.contact.gestion.contact.repository.CoordonneeRepository;
+import com.contact.gestion.contact.contacts.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -21,9 +20,8 @@ public class CoordonneeController {
     @PostMapping("/{contactId}")
     public Coordonnee create(@PathVariable Long contactId, @RequestBody Coordonnee coordonnee) {
         return contactRepository.findById(contactId).map(contact -> {
-            contact.addCoordonnee(coordonnee);
-            contactRepository.save(contact); // On sauvegarde le parent (Contact)
-            return coordonnee;
+            coordonnee.setContact(contact);
+            return coordonneeRepository.save(coordonnee);
         }).orElseThrow(() -> new RuntimeException("Contact non trouvé"));
     }
 
@@ -32,18 +30,23 @@ public class CoordonneeController {
         return coordonneeRepository.findAll();
     }
 
-    @PutMapping("/{id}")
-    public Coordonnee update(@PathVariable Long id, @RequestBody Coordonnee details) {
-        return coordonneeRepository.findById(id).map(c -> {
-            c.setType(details.getType());
-            c.setValeur(details.getValeur());
-            c.setLabel(details.getLabel());
-            return coordonneeRepository.save(c);
-        }).orElseThrow(() -> new RuntimeException("Coordonnée non trouvée"));
+    @GetMapping("/contact/{contactId}")
+    public List<Coordonnee> getByContact(@PathVariable Long contactId) {
+        return coordonneeRepository.findByContact_Id(contactId);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         coordonneeRepository.deleteById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Coordonnee update(@PathVariable Long id, @RequestBody Coordonnee details) {
+        return coordonneeRepository.findById(id).map(coordonnee -> {
+            coordonnee.setType(details.getType());
+            coordonnee.setValeur(details.getValeur());
+            coordonnee.setLabel(details.getLabel());
+            return coordonneeRepository.save(coordonnee);
+        }).orElseThrow(() -> new RuntimeException("Coordonnee non trouvée"));
     }
 }
