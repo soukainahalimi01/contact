@@ -1,7 +1,7 @@
 package com.contact.gestion.contact.contacts.model;
 
 import com.contact.gestion.contact.coordonnee.model.Coordonnee;
-import com.contact.gestion.contact.user.model.User; // تأكدي أنك بدلتِها هنا
+import com.contact.gestion.contact.user.model.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ public class Contact {
 
     public Contact() {}
 
-    // الميثود اللي كتجمع الربط (Association Method)
     public void addCoordonnee(Coordonnee coordonnee) {
         this.coordonnees.add(coordonnee);
         coordonnee.setContact(this);

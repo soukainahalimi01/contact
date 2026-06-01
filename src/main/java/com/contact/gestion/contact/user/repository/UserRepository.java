@@ -8,6 +8,6 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Had l-ster hwa li kay-khli UserService y-verifier l-unicité d l-email
+
     Optional<User> findByEmail(String email);
 }

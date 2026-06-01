@@ -33,7 +33,7 @@ public class ContactService {
                 .orElseThrow(() -> new RuntimeException("Contact not found with id: " + id));
     }
 
-    // UPDATE معدل بالأسماء الجديدة
+    // UPDATE
     public Contact updateContact(Long id, Contact updatedContactData) {
         Contact existingContact = contactRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contact non trouvé avec l'id: " + id));
@@ -48,7 +48,7 @@ public class ContactService {
             throw new RuntimeException("Erreur : Impossible, ce contact existe déjà !");
         }
 
-        // التحديث للأسماء الجديدة المعتمدة في المخطط
+
         existingContact.setLastName(updatedContactData.getLastName());
         existingContact.setFirstName(updatedContactData.getFirstName());
         existingContact.setTel(updatedContactData.getTel());
