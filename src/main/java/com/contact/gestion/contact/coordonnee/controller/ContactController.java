@@ -3,8 +3,8 @@ package com.contact.gestion.contact.coordonnee.controller;
 import com.contact.gestion.contact.contacts.model.Contact;
 import com.contact.gestion.contact.contacts.repository.ContactRepository;
 import com.contact.gestion.contact.user.model.User;
-import com.contact.gestion.contact.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -15,31 +15,27 @@ public class ContactController {
     @Autowired
     private ContactRepository contactRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
+    // Récupère uniquement les contacts de l'utilisateur connecté
     @GetMapping
-    public List<Contact> getAll() {
-        return contactRepository.findAll();
+    public List<Contact> getAll(@AuthenticationPrincipal User user) {
+        return contactRepository.findByUser(user);
     }
 
     @GetMapping("/{id}")
-    public Contact getById(@PathVariable Long id) {
-        return contactRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contact non trouvé avec l'id : " + id));
+    public Contact getById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return contactRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new RuntimeException("Contact non trouvé ou accès refusé"));
     }
 
-    @PostMapping("/user/{userId}")
-    public Contact create(@PathVariable Long userId, @RequestBody Contact contact) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User non trouvé avec l'id : " + userId));
+    @PostMapping
+    public Contact create(@RequestBody Contact contact, @AuthenticationPrincipal User user) {
         contact.setUser(user);
         return contactRepository.save(contact);
     }
 
     @PutMapping("/{id}")
-    public Contact update(@PathVariable Long id, @RequestBody Contact details) {
-        return contactRepository.findById(id).map(contact -> {
+    public Contact update(@PathVariable Long id, @RequestBody Contact details, @AuthenticationPrincipal User user) {
+        return contactRepository.findByIdAndUser(id, user).map(contact -> {
             contact.setLastName(details.getLastName());
             contact.setFirstName(details.getFirstName());
             contact.setTel(details.getTel());
@@ -53,7 +49,9 @@ public class ContactController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        contactRepository.deleteById(id);
+    public void delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        Contact contact = contactRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
+        contactRepository.delete(contact);
     }
 }
