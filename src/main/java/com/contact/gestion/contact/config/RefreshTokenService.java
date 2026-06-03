@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
+
 
 @Service
 public class RefreshTokenService {
@@ -17,15 +17,22 @@ public class RefreshTokenService {
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Transactional
     public RefreshToken createRefreshToken(User user) {
+
         refreshTokenRepository.deleteByUser(user);
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(604800000L)); // 7 jours
-        refreshToken.setToken(UUID.randomUUID().toString());
+
+        String refreshTokenValue = jwtUtil.generateRefreshToken(user);
+
+        refreshToken.setToken(refreshTokenValue);
+
         return refreshTokenRepository.save(refreshToken);
     }
 

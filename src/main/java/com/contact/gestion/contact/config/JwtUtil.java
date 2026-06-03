@@ -66,4 +66,17 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String generateRefreshToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 604800000L)) // 7 jours
+                .signWith(getSecretKey())
+                .compact();
+    }
 }
