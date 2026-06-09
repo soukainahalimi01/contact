@@ -1,6 +1,7 @@
 package com.contact.gestion.contact.coordonnee.controller;
 
 import com.contact.gestion.contact.contacts.model.Contact;
+import com.contact.gestion.contact.contacts.model.ContactDto;
 import com.contact.gestion.contact.contacts.repository.ContactRepository;
 import com.contact.gestion.contact.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,18 @@ public class ContactController {
 
     // Récupère uniquement les contacts de l'utilisateur connecté
     @GetMapping
-    public List<Contact> getAll(@AuthenticationPrincipal User user) {
-        return contactRepository.findByUser(user);
+    public List<ContactDto> getAll(@AuthenticationPrincipal User user) {
+
+        return contactRepository.findByUser(user)
+                .stream()
+                .map(c -> new ContactDto(
+                        c.getId(),
+                        c.getFirstName(),
+                        c.getLastName(),
+                        c.getTel(),
+                        c.getEmail()
+                ))
+                .toList();
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ package com.contact.gestion.contact.contacts.model;
 import com.contact.gestion.contact.coordonnee.model.Coordonnee;
 import com.contact.gestion.contact.user.model.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,8 @@ public class Contact {
     @JsonBackReference
     private User user;
 
-    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Coordonnee> coordonnees = new ArrayList<>();
 
     public Contact() {}

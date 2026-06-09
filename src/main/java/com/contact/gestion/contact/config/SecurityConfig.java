@@ -50,23 +50,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Désactivation du CSRF : nécessaire pour les APIs REST stateless
                 .csrf(csrf -> csrf.disable())
 
-                // 2. Gestion de session : STATELESS car on utilise des JWT
+                // 👇 AJOUT IMPORTANT
+                .cors(cors -> {})
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 3. Configuration des accès aux URL
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Login, Register, Refresh ouverts
-                        .anyRequest().authenticated() // Tout le reste protégé
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
 
-                // 4. Définition du provider d'authentification
                 .authenticationProvider(authenticationProvider())
-
-                // 5. Ajout du filtre JWT avant le filtre d'authentification standard
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
