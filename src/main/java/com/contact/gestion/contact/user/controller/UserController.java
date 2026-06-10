@@ -1,6 +1,7 @@
 package com.contact.gestion.contact.user.controller;
 
 import com.contact.gestion.contact.user.model.User;
+import com.contact.gestion.contact.user.model.UserDto;
 import com.contact.gestion.contact.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -25,12 +26,21 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping
-    public ResponseEntity<List<User>> getAll() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserDto>> getAll() {
+        List<UserDto> users = userService.getAllUsers()
+                .stream()
+                .map(u -> new UserDto(
+                        u.getId(),
+                        u.getFirstName(),
+                        u.getLastName(),
+                        u.getEmail(),
+                        u.getRole().name(),
+                        u.getDepartement().name()
+                ))
+                .toList();
+        return ResponseEntity.ok(users);
     }
-
     @PutMapping(value = "/{id}")
     public ResponseEntity<?> modifier(@PathVariable Long id, @RequestBody User userDetails) {
         try {

@@ -19,7 +19,6 @@ public class ContactController {
     // Récupère uniquement les contacts de l'utilisateur connecté
     @GetMapping
     public List<ContactDto> getAll(@AuthenticationPrincipal User user) {
-
         return contactRepository.findByUser(user)
                 .stream()
                 .map(c -> new ContactDto(
@@ -27,6 +26,10 @@ public class ContactController {
                         c.getFirstName(),
                         c.getLastName(),
                         c.getTel(),
+                        c.getCin(),
+                        c.getVille(),
+                        c.getPays(),
+                        c.getAdresse(),
                         c.getEmail()
                 ))
                 .toList();
