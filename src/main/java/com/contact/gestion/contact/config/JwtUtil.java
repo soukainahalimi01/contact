@@ -12,6 +12,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class JwtUtil {
@@ -28,6 +29,7 @@ public class JwtUtil {
 
     // ===== Générer le token avec id, firstName, lastName =====
     public String generateToken(User user) {
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId());
         claims.put("firstName", user.getFirstName());
@@ -37,6 +39,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(user.getEmail())
+                .setId(UUID.randomUUID().toString()) // important
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSecretKey())

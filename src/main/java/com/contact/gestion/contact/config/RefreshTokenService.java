@@ -3,10 +3,9 @@ package com.contact.gestion.contact.config;
 import com.contact.gestion.contact.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.util.Optional;
-
 
 @Service
 public class RefreshTokenService {
@@ -14,38 +13,37 @@ public class RefreshTokenService {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
-    }
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Transactional
-    public RefreshToken createRefreshToken(User user) {
+    public RefreshToken createOrUpdateRefreshToken(User user) {
 
-        refreshTokenRepository.deleteByUser(user);
+        String newToken = jwtUtil.generateRefreshToken(user);
 
-        RefreshToken refreshToken = new RefreshToken();
+        RefreshToken refreshToken = refreshTokenRepository
+                .findByUser(user)
+                .orElse(new RefreshToken());
+
         refreshToken.setUser(user);
-        refreshToken.setExpiryDate(Instant.now().plusMillis(604800000L)); // 7 jours
-
-        String refreshTokenValue = jwtUtil.generateRefreshToken(user);
-
-        refreshToken.setToken(refreshTokenValue);
+        refreshToken.setToken(newToken);
+        refreshToken.setExpiryDate(
+                Instant.now().plusSeconds(7 * 24 * 60 * 60)
+        );
 
         return refreshTokenRepository.save(refreshToken);
     }
 
-    public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token expiré. Veuillez vous reconnecter.");
-        }
-        return token;
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepository.findByToken(token);
     }
 
-    @Transactional
-    public void deleteByUser(User user) {
-        refreshTokenRepository.deleteByUser(user);
+    public RefreshToken verifyExpiration(RefreshToken token) {
+
+        if (token.getExpiryDate().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(token);
+            throw new RuntimeException("Refresh token expired");
+        }
+
+        return token;
     }
 }

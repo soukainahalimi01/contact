@@ -2,7 +2,9 @@ package com.contact.gestion.contact.user.controller;
 
 import com.contact.gestion.contact.config.JwtUtil;
 import com.contact.gestion.contact.config.RefreshToken;
+import com.contact.gestion.contact.config.RefreshTokenRepository;
 import com.contact.gestion.contact.config.RefreshTokenService;
+import com.contact.gestion.contact.user.model.LoginRequest;
 import com.contact.gestion.contact.user.model.User;
 import com.contact.gestion.contact.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class AuthController {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
     // ===== Register =====
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -47,25 +52,36 @@ public class AuthController {
 
     // ===== Login =====
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+
         try {
+
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
             );
 
-            User fullUser = (User) userService.loadUserByUsername(user.getEmail());
-            String token = jwtUtil.generateToken(fullUser);
+            User user = userService
+                    .findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Création de la carte (Refresh Token) - Écrase l'ancienne s'il y en a une
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(fullUser);
+            String accessToken = jwtUtil.generateToken(user);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
+            RefreshToken refreshToken =
+                    refreshTokenService.createOrUpdateRefreshToken(user);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("token", accessToken);
             response.put("refreshToken", refreshToken.getToken());
 
             return ResponseEntity.ok(response);
+
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect !");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
         }
     }
 
