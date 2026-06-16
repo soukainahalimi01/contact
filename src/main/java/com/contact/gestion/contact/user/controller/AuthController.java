@@ -53,9 +53,7 @@ public class AuthController {
     // ===== Login =====
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-
         try {
-
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
@@ -68,9 +66,7 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             String accessToken = jwtUtil.generateToken(user);
-
-            RefreshToken refreshToken =
-                    refreshTokenService.createOrUpdateRefreshToken(user);
+            RefreshToken refreshToken = refreshTokenService.createOrUpdateRefreshToken(user);
 
             Map<String, String> response = new HashMap<>();
             response.put("token", accessToken);
@@ -79,18 +75,16 @@ public class AuthController {
             return ResponseEntity.ok(response);
 
         } catch (AuthenticationException e) {
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid email or password");
         }
     }
 
-    // ===== Refresh Token Endpoint =====
+    // ===== Refresh Token =====
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String requestRefreshToken = request.get("refreshToken");
 
-        // 1. Recherche du token en base
         Optional<RefreshToken> refreshTokenOpt = refreshTokenService.findByToken(requestRefreshToken);
 
         if (refreshTokenOpt.isEmpty()) {
@@ -100,7 +94,6 @@ public class AuthController {
 
         RefreshToken token = refreshTokenOpt.get();
 
-        // 2. Vérification de l'expiration et génération
         try {
             refreshTokenService.verifyExpiration(token);
 
@@ -115,6 +108,27 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Carte expirée. Veuillez vous reconnecter.");
+        }
+    }
+
+    // ===== Changer Mot de Passe =====
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changerMotDePasse(
+            @RequestBody Map<String, String> body,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token  = authHeader.replace("Bearer ", "");
+            String email  = jwtUtil.extractEmail(token); // ✅ nom correct
+
+            String ancienMdp  = body.get("ancienMotDePasse");
+            String nouveauMdp = body.get("nouveauMotDePasse");
+
+            userService.changerMotDePasse(email, ancienMdp, nouveauMdp);
+
+            return ResponseEntity.ok("Mot de passe mis à jour !");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

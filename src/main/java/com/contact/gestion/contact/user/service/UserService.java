@@ -75,4 +75,19 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("User introuvable avec l'id : " + id));
         userRepository.delete(existingUser);
     }
+
+    // ===== Changer Mot de Passe ===== ← NOUVEAU
+    public void changerMotDePasse(String email, String ancienMdp, String nouveauMdp) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Vérifier l'ancien mot de passe
+        if (!passwordEncoder.matches(ancienMdp, user.getPassword())) {
+            throw new RuntimeException("Ancien mot de passe incorrect");
+        }
+
+        // Sauvegarder le nouveau mot de passe hashé en base
+        user.setPassword(passwordEncoder.encode(nouveauMdp));
+        userRepository.save(user);
+    }
 }
