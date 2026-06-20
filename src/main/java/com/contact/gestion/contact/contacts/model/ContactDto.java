@@ -12,10 +12,11 @@ public class ContactDto {
     private String adresse;
     private String email;
     private String addedByName;
+    private Long addedByUserId;
 
     public ContactDto(Long id, String firstName, String lastName, String tel,
                       String cin, String ville, String pays, String adresse, String email,
-                      String addedByName) {
+                      String addedByName, Long addedByUserId) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -26,6 +27,7 @@ public class ContactDto {
         this.adresse = adresse;
         this.email = email;
         this.addedByName = addedByName;
+        this.addedByUserId = addedByUserId;
     }
 
     // Getters
@@ -39,4 +41,5 @@ public class ContactDto {
     public String getAdresse() { return adresse; }
     public String getEmail() { return email; }
     public String getAddedByName() { return addedByName; }
+    public Long getAddedByUserId() { return addedByUserId; }
 }

@@ -18,16 +18,12 @@ public class ContactController {
     @Autowired
     private ContactRepository contactRepository;
 
-    // Admin voit TOUS les contacts (de tous les users), un USER voit seulement les siens
+    // Admin ET User voient TOUS les contacts (de tous les users).
+    // La différence se fait uniquement sur les droits d'action (Edit/Del) côté frontend,
+    // un USER ne pouvant agir que sur SES PROPRES contacts (addedByUserId == son id).
     @GetMapping
     public List<ContactDto> getAll(@AuthenticationPrincipal User user) {
-        List<Contact> contacts;
-
-        if (user.getRole() == Role.ADMIN) {
-            contacts = contactRepository.findAll();
-        } else {
-            contacts = contactRepository.findByUser(user);
-        }
+        List<Contact> contacts = contactRepository.findAll();
 
         return contacts.stream()
                 .map(c -> new ContactDto(
@@ -42,7 +38,8 @@ public class ContactController {
                         c.getEmail(),
                         c.getUser() != null
                                 ? c.getUser().getFirstName() + " " + c.getUser().getLastName()
-                                : null
+                                : null,
+                        c.getUser() != null ? c.getUser().getId() : null
                 ))
                 .toList();
     }
