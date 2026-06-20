@@ -39,7 +39,10 @@ public class ContactController {
                         c.getVille(),
                         c.getPays(),
                         c.getAdresse(),
-                        c.getEmail()
+                        c.getEmail(),
+                        c.getUser() != null
+                                ? c.getUser().getFirstName() + " " + c.getUser().getLastName()
+                                : null
                 ))
                 .toList();
     }
