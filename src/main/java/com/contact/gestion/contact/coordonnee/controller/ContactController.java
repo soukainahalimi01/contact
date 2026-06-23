@@ -45,13 +45,9 @@ public class ContactController {
     }
 
     @GetMapping("/{id}")
-    public Contact getById(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        if (user.getRole() == Role.ADMIN) {
-            return contactRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
-        }
-        return contactRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new RuntimeException("Contact non trouvé ou accès refusé"));
+    public Contact getById(@PathVariable Long id) {
+        return contactRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
     }
 
     // Seul un USER peut créer un contact ; ADMIN n'a pas le droit de créer
@@ -65,10 +61,16 @@ public class ContactController {
     }
 
     @PutMapping("/{id}")
-    public Contact update(@PathVariable Long id, @RequestBody Contact details, @AuthenticationPrincipal User user) {
-        Contact contact = (user.getRole() == Role.ADMIN)
-                ? contactRepository.findById(id).orElseThrow(() -> new RuntimeException("Contact non trouvé"))
-                : contactRepository.findByIdAndUser(id, user).orElseThrow(() -> new RuntimeException("Contact non trouvé"));
+    public Contact update(@PathVariable Long id,
+                          @RequestBody Contact details,
+                          @AuthenticationPrincipal User user) {
+
+        if (user.getRole() == Role.ADMIN) {
+            throw new RuntimeException("L'administrateur ne peut pas modifier un contact.");
+        }
+
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
 
         contact.setLastName(details.getLastName());
         contact.setFirstName(details.getFirstName());
@@ -78,14 +80,21 @@ public class ContactController {
         contact.setPays(details.getPays());
         contact.setAdresse(details.getAdresse());
         contact.setEmail(details.getEmail());
+
         return contactRepository.save(contact);
     }
-
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        Contact contact = (user.getRole() == Role.ADMIN)
-                ? contactRepository.findById(id).orElseThrow(() -> new RuntimeException("Contact non trouvé"))
-                : contactRepository.findByIdAndUser(id, user).orElseThrow(() -> new RuntimeException("Contact non trouvé"));
+    public void delete(@PathVariable Long id,
+                       @AuthenticationPrincipal User user) {
+
+        if (user.getRole() == Role.ADMIN) {
+            throw new RuntimeException("L'administrateur ne peut pas supprimer un contact.");
+        }
+
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
+
+        
 
         contactRepository.delete(contact);
     }
