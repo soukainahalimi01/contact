@@ -8,8 +8,10 @@ import com.contact.gestion.contact.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import com.contact.gestion.contact.historique.model.Historique;
+import com.contact.gestion.contact.historique.repository.HistoriqueRepository;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/contacts")
@@ -17,6 +19,8 @@ public class ContactController {
 
     @Autowired
     private ContactRepository contactRepository;
+    @Autowired
+    private HistoriqueRepository historiqueRepository;
 
     // Admin ET User voient TOUS les contacts (de tous les users).
     // La différence se fait uniquement sur les droits d'action (Edit/Del) côté frontend,
@@ -50,14 +54,27 @@ public class ContactController {
                 .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
     }
 
-    // Seul un USER peut créer un contact ; ADMIN n'a pas le droit de créer
     @PostMapping
     public Contact create(@RequestBody Contact contact, @AuthenticationPrincipal User user) {
         if (user.getRole() == Role.ADMIN) {
             throw new RuntimeException("Un administrateur ne peut pas créer de contact.");
         }
         contact.setUser(user);
-        return contactRepository.save(contact);
+        Contact savedContact = contactRepository.save(contact);
+
+        Historique historique = new Historique();
+        historique.setUsername(user.getFirstName() + " " + user.getLastName());
+        historique.setAction("CREATION");
+        historique.setContactName(
+                savedContact.getFirstName() + " " + savedContact.getLastName()
+        );
+        historique.setOldValue("-");
+        historique.setNewValue("Contact créé");
+        historique.setDateAction(java.time.LocalDateTime.now());
+
+        historiqueRepository.save(historique);
+
+        return savedContact;
     }
 
     @PutMapping("/{id}")
@@ -72,6 +89,11 @@ public class ContactController {
         Contact contact = contactRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
 
+        String avant =
+                "Nom=" + contact.getLastName() +
+                        ", Prénom=" + contact.getFirstName() +
+                        ", Ville=" + contact.getVille() +
+                        ", Tel=" + contact.getTel();
         contact.setLastName(details.getLastName());
         contact.setFirstName(details.getFirstName());
         contact.setTel(details.getTel());
@@ -81,7 +103,27 @@ public class ContactController {
         contact.setAdresse(details.getAdresse());
         contact.setEmail(details.getEmail());
 
-        return contactRepository.save(contact);
+        Contact updatedContact = contactRepository.save(contact);
+
+        String apres =
+                "Nom=" + updatedContact.getLastName() +
+                        ", Prénom=" + updatedContact.getFirstName() +
+                        ", Ville=" + updatedContact.getVille() +
+                        ", Tel=" + updatedContact.getTel();
+
+        Historique historique = new Historique();
+        historique.setUsername(user.getFirstName() + " " + user.getLastName());
+        historique.setAction("MODIFICATION");
+        historique.setContactName(
+                updatedContact.getFirstName() + " " + updatedContact.getLastName()
+        );
+        historique.setOldValue(avant);
+        historique.setNewValue(apres);
+        historique.setDateAction(java.time.LocalDateTime.now());
+
+        historiqueRepository.save(historique);
+
+        return updatedContact;
     }
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id,
@@ -94,8 +136,21 @@ public class ContactController {
         Contact contact = contactRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contact non trouvé"));
 
-        
+        Historique historique = new Historique();
+
+        historique.setUsername(user.getFirstName() + " " + user.getLastName());
+        historique.setAction("SUPPRESSION");
+        historique.setContactName(
+                contact.getFirstName() + " " + contact.getLastName()
+        );
+        historique.setOldValue("Contact complet");
+        historique.setNewValue("-");
+        historique.setDateAction(java.time.LocalDateTime.now());
+
+        historiqueRepository.save(historique);
 
         contactRepository.delete(contact);
+
+
     }
 }
